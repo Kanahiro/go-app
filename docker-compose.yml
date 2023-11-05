@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+    app:
+        volumes:
+            - ./app:/app/
+        working_dir: /app
+        tty: true
+        build:
+            context: ./app
+            dockerfile: Dockerfile.local
+        ports:
+            - 8080:8080
+        command: sh -c 'go mod tidy && air'
+    front:
+        image: node:18-bullseye-slim
+        working_dir: /app
+        ports:
+            - 5173:5173
+        volumes:
+            - ./front:/app/
+        command:
+            - /bin/bash
+            - -c
+            - |
+                npm install
+                npm run dev -- --host
