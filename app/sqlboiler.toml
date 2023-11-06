@@ -1,0 +1,11 @@
+pkgname="db"
+output="service/db"
+wipe=true
+add-global-variants=false
+no-tests=true
+
+[psql]
+dbname = "postgres"
+host = "postgres"
+user = "postgres"
+pass = "postgres"
