@@ -1,27 +1,60 @@
 package main
 
 import (
-	"fmt"
-	"gin/graph"
-	"gin/infra"
-	"log"
 	"net/http"
+	"strconv"
 
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/gin-gonic/gin"
+
+	"gin/infra"
+	"gin/service"
 )
 
-const defaultPort = "8080"
-
 func main() {
+	engine := gin.Default()
+	engine.GET("/health", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "ok",
+		})
+	})
 
-	fmt.Println(infra.Db())
+	db := infra.InitDb()
 
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	rootGroup := engine.Group("/api")
+	{
+		todoGroup := rootGroup.Group("/todo")
+		{
+			todoService := service.NewTodoService(*db)
 
-	http.Handle("/debug", playground.Handler("GraphQL playground", "/api/query"))
-	http.Handle("/api/query", srv)
+			todoGroup.GET("/", func(c *gin.Context) {
+				todoList := todoService.GetTodoList()
+				c.JSON(http.StatusOK, todoList)
+			})
+			todoGroup.POST("/", func(c *gin.Context) {
+				text := "sample"
+				done := false
+				todo := todoService.CreateTodo(text, done)
+				c.JSON(http.StatusOK, todo)
+			})
+			todoGroup.PUT("/:id", func(c *gin.Context) {
+				id, err := strconv.Atoi(c.Param("id"))
+				if err != nil {
+					panic(err)
+				}
+				todo := todoService.UpdateTodoByID(id, "sample", false)
+				c.JSON(http.StatusOK, todo)
+			})
+			todoGroup.DELETE("/:id", func(c *gin.Context) {
+				id, err := strconv.Atoi(c.Param("id"))
+				if err != nil {
+					panic(err)
+				}
+				result := todoService.DeleteTodoByID(id)
+				c.JSON(http.StatusOK, result)
+			})
+		}
+	}
 
-	log.Printf("connect to http://localhost:%s/ for GraphQL playground", defaultPort)
-	log.Fatal(http.ListenAndServe(":"+defaultPort, nil))
+	engine.Run(":3000")
+
 }

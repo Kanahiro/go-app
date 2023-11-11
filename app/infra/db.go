@@ -10,22 +10,15 @@ import (
 )
 
 var schema = `
-CREATE TABLE IF NOT EXISTS myuser (
-		id serial PRIMARY KEY,
-		name text NOT NULL,
-		email text
-);
-
 CREATE TABLE IF NOT EXISTS todo (
 		id serial PRIMARY KEY,
 		text text NOT NULL,
-		done boolean NOT NULL,
-		user_id integer REFERENCES myuser(id)
-)`
+		done boolean NOT NULL
+);`
 
 var DbInstance *sqlx.DB
 
-func Db() *sqlx.DB {
+func InitDb() *sqlx.DB {
 	if DbInstance != nil {
 		return DbInstance
 	}
@@ -47,4 +40,8 @@ func Db() *sqlx.DB {
 	}
 
 	return DbInstance
+}
+
+func Db() *sqlx.DB {
+	return InitDb()
 }
