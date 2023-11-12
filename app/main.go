@@ -31,9 +31,15 @@ func main() {
 				c.JSON(http.StatusOK, todoList)
 			})
 			todoGroup.POST("/", func(c *gin.Context) {
-				text := "sample"
-				done := false
-				todo := todoService.CreateTodo(text, done)
+				var body struct {
+					Text string `json:"text"`
+					Done bool   `json:"done"`
+				}
+				if err := c.BindJSON(&body); err != nil {
+					panic(err)
+				}
+
+				todo := todoService.CreateTodo(body.Text, body.Done)
 				c.JSON(http.StatusOK, todo)
 			})
 			todoGroup.PUT("/:id", func(c *gin.Context) {
@@ -41,7 +47,16 @@ func main() {
 				if err != nil {
 					panic(err)
 				}
-				todo := todoService.UpdateTodoByID(id, "sample", false)
+
+				var body struct {
+					Text string `json:"text"`
+					Done bool   `json:"done"`
+				}
+				if err := c.BindJSON(&body); err != nil {
+					panic(err)
+				}
+
+				todo := todoService.UpdateTodoByID(id, body.Text, body.Done)
 				c.JSON(http.StatusOK, todo)
 			})
 			todoGroup.DELETE("/:id", func(c *gin.Context) {
