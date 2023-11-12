@@ -32,9 +32,8 @@
           }
         }
       `
-		}).subscribe((res) => {
-			if (res.data) invalidate('app:todolist');
 		});
+		invalidate('app:todolist');
 	};
 
 	const deleteTodo = async (id: string) => {
@@ -45,9 +44,8 @@
           deleteTodo (id: "${id}")
         }
       `
-		}).subscribe((res) => {
-			if (res.data) invalidate('app:todolist');
 		});
+		invalidate('app:todolist');
 	};
 
 	const createTodo = async (newTodo: Omit<Todo, 'id'>) => {
@@ -62,9 +60,9 @@
           }
         }
       `
-		}).subscribe((res) => {
-			if (res.data) invalidate('app:todolist');
 		});
+		invalidate('app:todolist');
+		newTodo.text = '';
 	};
 </script>
 
